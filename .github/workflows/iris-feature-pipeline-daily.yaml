@@ -3,10 +3,11 @@ name: Daily Iris Feature Pipeline
 on:
   schedule:
     # At 15 past every hour
-    - cron: '15 * * * *'
+    - cron: '10 * * * *'
     # At 00:00 UTC every day
     #- cron: '0 0 * * *'
-
+  workflow_dispatch:
+  
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
