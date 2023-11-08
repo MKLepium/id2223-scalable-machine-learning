@@ -27,4 +27,6 @@ jobs:
 
 
     - name: Run Iris Feature Pipeline
+      env:
+        HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
       run: python ./src/serverless-ml-intro/iris-feature-pipeline-daily.py
