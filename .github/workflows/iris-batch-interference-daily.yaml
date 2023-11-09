@@ -1,11 +1,12 @@
-name: Daily Iris Training Pipeline (WIP)
+name: Daily Iris Batch Interference Pipeline
 
 on:
-  #schedule:
+  schedule:
     # At 15 past every hour
     # - cron: '10 * * * *'
-    # At 00:00 UTC every day
-    #- cron: '0 0 * * *'
+    # At 02:00 UTC every day
+    - cron: '2 0 * * *'
+    # I just wanted to delay it to make sure the features are in before we interfer
   workflow_dispatch:
 
 jobs:
@@ -26,9 +27,7 @@ jobs:
         pip install -r ./src/serverless-ml-intro/requirements.txt
 
 
-    - name: create python file from notebook and run it
+    - name: Run Iris Feature Pipeline
       env:
         HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
-      run: |
-        python ./src/serverless-ml-intro/notebook_to_python.py ./src/serverless-ml-intro/iris_training_pipeline.ipynb ./src/serverless-ml-intro/iris_training_pipeline.py
-        python ./src/serverless-ml-intro/iris_training_pipeline.py
+      run: python ./src/serverless-ml-intro/iris-batch-interference-pipeline.py
