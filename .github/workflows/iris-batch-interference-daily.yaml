@@ -30,4 +30,4 @@ jobs:
     - name: Run Iris Feature Pipeline
       env:
         HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
-      run: python ./src/serverless-ml-intro/iris-batch-interference-pipeline.py
+      run: python ./src/serverless-ml-intro/iris-batch-inference-pipeline.py
