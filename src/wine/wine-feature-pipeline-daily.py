@@ -1,5 +1,9 @@
 import os
 import modal
+import random
+import pandas as pd
+import hopsworks
+
 
 LOCAL=True
 
@@ -17,9 +21,6 @@ def generate_flower(name, sepal_len_max, sepal_len_min, sepal_width_max, sepal_w
     """
     Returns a single iris flower as a single row in a DataFrame
     """
-    import pandas as pd
-    import random
-
     df = pd.DataFrame({ "sepal_length": [random.uniform(sepal_len_max, sepal_len_min)],
                        "sepal_width": [random.uniform(sepal_width_max, sepal_width_min)],
                        "petal_length": [random.uniform(petal_len_max, petal_len_min)],
@@ -29,44 +30,98 @@ def generate_flower(name, sepal_len_max, sepal_len_min, sepal_width_max, sepal_w
     return df
 
 
-def get_random_iris_flower():
-    """
-    Returns a DataFrame containing one random iris flower
-    """
-    import pandas as pd
-    import random
+def generate_wine_sample(min_values, max_values, wine_type):
+    wine_sample = {}
+    for feature in min_values.keys():
+        wine_sample[feature] = [random.uniform(min_values[feature], max_values[feature])]
 
-    virginica_df = generate_flower("Virginica", 8, 5.5, 3.8, 2.2, 7, 4.5, 2.5, 1.4)
-    versicolor_df = generate_flower("Versicolor", 7.5, 4.5, 3.5, 2.1, 3.1, 5.5, 1.8, 1.0)
-    setosa_df =  generate_flower("Setosa", 6, 4.5, 4.5, 2.3, 1.2, 2, 0.7, 0.3)
+    df = pd.DataFrame(wine_sample)
+    df['type'] = wine_type
+    return df
 
-    # randomly pick one of these 3 and write it to the featurestore
-    # pick_random = random.uniform(0,3)
-    pick_random = 1
-    if pick_random >= 2:
-        iris_df = virginica_df
-        print("Virginica added")
-    elif pick_random >= 1:
-        iris_df = versicolor_df
-        print("Versicolor added")
-    else:
-        iris_df = setosa_df
-        print("Setosa added")
+def generate_n_wine_samples(min_values, max_values, wine_type, n):
+    df = pd.DataFrame()
+    for i in range(n):
+        df = df._append(generate_wine_sample(min_values, max_values, wine_type))
+    return df
 
-    return iris_df
 
 
 def g():
-    import hopsworks
-    import pandas as pd
 
-    project = hopsworks.login()
-    fs = project.get_feature_store()
+    #project = hopsworks.login()
+    #fs = project.get_feature_store()
+    # input
+    min_values_white_wine = {
+        "fixed acidity": 3.8,
+        "volatile acidity": 0.08,
+        "citric acid": 0.0,
+        "residual sugar": 0.6,
+        "chlorides": 0.009,
+        "free sulfur dioxide": 2.0,
+        "total sulfur dioxide": 9.0,
+        "density": 0.98711,
+        "pH": 2.72,
+        "sulphates": 0.22,
+        "alcohol": 8.0,
+        "quality": 3.0
+    }
 
-    iris_df = get_random_iris_flower()
+    max_values_white_wine = {
+        "fixed acidity": 14.2,
+        "volatile acidity": 1.1,
+        "citric acid": 1.66,
+        "residual sugar": 65.8,
+        "chlorides": 0.346,
+        "free sulfur dioxide": 289.0,
+        "total sulfur dioxide": 440.0,
+        "density": 1.03898,
+        "pH": 3.82,
+        "sulphates": 1.08,
+        "alcohol": 14.2,
+        "quality": 9.0
+    }
 
-    iris_fg = fs.get_feature_group(name="iris",version=1)
-    iris_fg.insert(iris_df)
+    # Given values for red wine min and max
+    min_values_red_wine = {
+        "fixed acidity": 4.6,
+        "volatile acidity": 0.12,
+        "citric acid": 0.0,
+        "residual sugar": 0.9,
+        "chlorides": 0.012,
+        "free sulfur dioxide": 1.0,
+        "total sulfur dioxide": 6.0,
+        "density": 0.99007,
+        "pH": 2.74,
+        "sulphates": 0.33,
+        "alcohol": 8.4,
+        "quality": 3.0
+    }
+
+    max_values_red_wine = {
+        "fixed acidity": 15.9,
+        "volatile acidity": 1.58,
+        "citric acid": 1.0,
+        "residual sugar": 15.5,
+        "chlorides": 0.611,
+        "free sulfur dioxide": 72.0,
+        "total sulfur dioxide": 289.0,
+        "density": 1.00369,
+        "pH": 4.01,
+        "sulphates": 2.0,
+        "alcohol": 14.9,
+        "quality": 8.0
+    }
+    red_wine_df = generate_n_wine_samples(min_values_red_wine, max_values_red_wine, "red", 100)
+    white_wine_df = generate_n_wine_samples(min_values_white_wine, max_values_white_wine, "white", 100)
+    print("Red wine sample: ")
+    print(red_wine_df.head())
+    print("White wine sample: ")
+    print(white_wine_df.head())
+    print()
+
+    #iris_fg = fs.get_feature_group(name="iris",version=1)
+    #iris_fg.insert(iris_df)
 
 if __name__ == "__main__":
     if LOCAL == True :
