@@ -1,11 +1,11 @@
-name: Daily Iris Batch Interference Pipeline
+name: Daily Iris Batch Inference Pipeline
 
 on:
   schedule:
     # At 15 past every hour
     # - cron: '10 * * * *'
-    # At 02:00 UTC every day
-    - cron: '2 0 * * *'
+    # At 03:00 UTC every day
+    - cron: '3 0 * * *'
     # I just wanted to delay it to make sure the features are in before we interfer
   workflow_dispatch:
 
@@ -27,7 +27,7 @@ jobs:
         pip install -r ./src/serverless-ml-intro/requirements.txt
 
 
-    - name: Run Iris Batch Interference Pipeline
+    - name: Run Iris Batch Inference Pipeline
       env:
         HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
       run: python ./src/serverless-ml-intro/iris-batch-inference-pipeline.py
