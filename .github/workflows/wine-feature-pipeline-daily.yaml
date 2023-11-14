@@ -1,0 +1,32 @@
+name: Daily Wine Feature Pipeline
+
+on:
+  schedule:
+    # At 15 past every hour
+    # - cron: '10 * * * *'
+    # At 00:00 UTC every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r ./src/wine/requirements.txt
+
+
+    - name: Run Wine Feature Pipeline
+      env:
+        HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+      run: python ./src/wine/wine-feature-pipeline-daily.py

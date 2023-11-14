@@ -3,9 +3,11 @@ import modal
 import random
 import pandas as pd
 import hopsworks
+from find_min_and_max_values_for_wine import generate_n_wine_samples
 
 
 LOCAL=True
+VERSION=1
 
 if LOCAL == False:
    stub = modal.Stub("wine_daily")
@@ -15,118 +17,89 @@ if LOCAL == False:
    def f():
        g()
 
-
-def generate_flower(name, sepal_len_max, sepal_len_min, sepal_width_max, sepal_width_min, 
-                    petal_len_max, petal_len_min, petal_width_max, petal_width_min):
-    """
-    Returns a single iris flower as a single row in a DataFrame
-    """
-    df = pd.DataFrame({ "sepal_length": [random.uniform(sepal_len_max, sepal_len_min)],
-                       "sepal_width": [random.uniform(sepal_width_max, sepal_width_min)],
-                       "petal_length": [random.uniform(petal_len_max, petal_len_min)],
-                       "petal_width": [random.uniform(petal_width_max, petal_width_min)]
-                      })
-    df['variety'] = name
-    return df
-
-
-def generate_wine_sample(min_values, max_values, wine_type):
-    wine_sample = {}
-    for feature in min_values.keys():
-        wine_sample[feature] = [random.uniform(min_values[feature], max_values[feature])]
-
-    df = pd.DataFrame(wine_sample)
-    df['type'] = wine_type
-    return df
-
-def generate_n_wine_samples(min_values, max_values, wine_type, n):
-    df = pd.DataFrame()
-    for i in range(n):
-        df = df._append(generate_wine_sample(min_values, max_values, wine_type))
-    return df
-
-
-
 def g():
 
-    #project = hopsworks.login()
-    #fs = project.get_feature_store()
-    # input
-    min_values_white_wine = {
-        "fixed acidity": 3.8,
-        "volatile acidity": 0.08,
-        "citric acid": 0.0,
-        "residual sugar": 0.6,
-        "chlorides": 0.009,
-        "free sulfur dioxide": 2.0,
-        "total sulfur dioxide": 9.0,
-        "density": 0.98711,
-        "pH": 2.72,
-        "sulphates": 0.22,
-        "alcohol": 8.0,
-        "quality": 3.0
-    }
+        project = hopsworks.login()
+        fs = project.get_feature_store()
 
-    max_values_white_wine = {
-        "fixed acidity": 14.2,
-        "volatile acidity": 1.1,
-        "citric acid": 1.66,
-        "residual sugar": 65.8,
-        "chlorides": 0.346,
-        "free sulfur dioxide": 289.0,
-        "total sulfur dioxide": 440.0,
-        "density": 1.03898,
-        "pH": 3.82,
-        "sulphates": 1.08,
-        "alcohol": 14.2,
-        "quality": 9.0
-    }
+        wine_df = generate_n_wine_samples(200)
+        print(wine_df.head())
 
-    # Given values for red wine min and max
-    min_values_red_wine = {
-        "fixed acidity": 4.6,
-        "volatile acidity": 0.12,
-        "citric acid": 0.0,
-        "residual sugar": 0.9,
-        "chlorides": 0.012,
-        "free sulfur dioxide": 1.0,
-        "total sulfur dioxide": 6.0,
-        "density": 0.99007,
-        "pH": 2.74,
-        "sulphates": 0.33,
-        "alcohol": 8.4,
-        "quality": 3.0
-    }
+        wine_fg = fs.get_feature_group(name="wine",version=VERSION)
+        # replace the "quality" column from double to bigint
+        wine_df['quality'] = wine_df['quality'].astype('int64')
+        wine_fg.insert(wine_df)
 
-    max_values_red_wine = {
-        "fixed acidity": 15.9,
-        "volatile acidity": 1.58,
-        "citric acid": 1.0,
-        "residual sugar": 15.5,
-        "chlorides": 0.611,
-        "free sulfur dioxide": 72.0,
-        "total sulfur dioxide": 289.0,
-        "density": 1.00369,
-        "pH": 4.01,
-        "sulphates": 2.0,
-        "alcohol": 14.9,
-        "quality": 8.0
-    }
-    red_wine_df = generate_n_wine_samples(min_values_red_wine, max_values_red_wine, "red", 100)
-    white_wine_df = generate_n_wine_samples(min_values_white_wine, max_values_white_wine, "white", 100)
-    print("Red wine sample: ")
-    print(red_wine_df.head())
-    print("White wine sample: ")
-    print(white_wine_df.head())
-    print()
 
-    #iris_fg = fs.get_feature_group(name="iris",version=1)
-    #iris_fg.insert(iris_df)
+def eda():
+    project = hopsworks.login()
+    fs = project.get_feature_store()
+    wine_red_df = pd.read_csv("wine+quality/winequality-red.csv", sep=';')
+    # add a column to indicate the red wine type
+    wine_red_df['type'] = -1
+
+
+    wine_white_df = pd.read_csv("wine+quality/winequality-white.csv", sep=';')
+    # add a column to indicate the white wine type
+    wine_white_df['type'] = 1
+
+    # concatenate the two datasets
+    wine_df = pd.concat([wine_red_df, wine_white_df], axis=0)
+
+    # set lowercase
+    wine_df.columns = wine_df.columns.str.lower()
+
+    # replace spaces with underscores
+    wine_df.columns = wine_df.columns.str.replace(' ', '_')
+    wine_fg = fs.get_or_create_feature_group(
+    name="wine",
+    version=VERSION,
+    primary_key=list(wine_df.columns.drop('type').drop('quality')),
+    description="Wine quality dataset")
+    wine_fg.insert(wine_df)
+    from great_expectations.core import ExpectationSuite, ExpectationConfiguration
+
+    def expect(suite, column, min_val, max_val):
+        suite.add_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_between",
+            kwargs={
+                "column":column, 
+                "min_value":min_val,
+                "max_value":max_val,
+            }
+        )
+    )
+    suite = ExpectationSuite(expectation_suite_name="wine_characteristics")
+
+    import numpy as np
+    from scipy import stats
+
+    for column in wine_df.columns:
+        if column in ["quality", "type"]:
+            continue
+
+        mean = wine_df[column].mean()
+        std_dev = wine_df[column].std()
+
+
+        # I am allowing 5 standard deviations from the mean
+        # And since that still had some outliers I added 1 to each side
+        lower_bound = (mean - 5 * std_dev) - 1
+        upper_bound = (mean + 5 * std_dev) + 1
+        # Create expectation for the column using the calculated bounds
+        expect(suite, column, lower_bound, upper_bound)
+
+    # Save the expectation suite
+    wine_fg.save_expectation_suite(expectation_suite=suite, validation_ingestion_policy="STRICT")
+
 
 if __name__ == "__main__":
+    # replaces the eda notebook
+    # eda()
     if LOCAL == True :
         g()
     else:
-        stub.deploy("iris_daily")
+        stub.deploy("wine_daily")
         with stub.run():
             f()

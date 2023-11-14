@@ -16,8 +16,11 @@ def generate_samples_with_quality(csv_file, num_samples):
             mean = df[column].mean()
             std = df[column].std()
             
-            # Generate random samples based on a normal distribution with the calculated mean and std
+            # Generate random samples based on a log-normal distribution with the calculated mean and std
             samples[column] = np.random.normal(mean, std, num_samples)
+            # Replace negative values with 0
+            samples[column][samples[column] < 0] = 0
+            
     
     generated_df = pd.DataFrame(samples)
     
@@ -39,14 +42,33 @@ def generate_samples_with_quality(csv_file, num_samples):
     
     return generated_df
 
-white_wine_path = 'wine+quality/winequality-white.csv'
-red_wine_path = 'wine+quality/winequality-red.csv'
+def generate_n_wine_samples(num_samples):
+    """
+    Generates n/2 samples of wine using the k-means clustering algorithm to generate the quality values
+    And a normal distribution to generate the other values
+    """
+    white_wine_path = 'wine+quality/winequality-white.csv'
+    red_wine_path = 'wine+quality/winequality-red.csv'
 
-# Generate 100 samples for white wine data with arbitrary quality values
-white_wine_samples = generate_samples_with_quality(white_wine_path, num_samples=100)
-# Generate 100 samples for red wine data with arbitrary quality values
-red_wine_samples = generate_samples_with_quality(red_wine_path, num_samples=100)
+    
+    white_wine_samples = generate_samples_with_quality(white_wine_path, num_samples=int(num_samples/2))
+    white_wine_samples['type'] = -1
+    red_wine_samples = generate_samples_with_quality(red_wine_path, num_samples=int(num_samples/2))
+    red_wine_samples['type'] = 1
 
-print("White wine generated samples with adjusted quality: \n", white_wine_samples)
-print()
-print("Red wine generated samples with adjusted quality: \n", red_wine_samples)
+    #print("White wine generated samples with adjusted quality: \n", white_wine_samples)
+    #print()
+    #print("Red wine generated samples with adjusted quality: \n", red_wine_samples)
+
+    # Replace spaces with underscores in the column names
+    white_wine_samples.columns = [col.replace(' ', '_') for col in white_wine_samples.columns]
+    red_wine_samples.columns = [col.replace(' ', '_') for col in red_wine_samples.columns]
+
+
+
+
+    return pd.concat([white_wine_samples, red_wine_samples])
+
+
+if __name__ == "__main__":
+    generate_n_wine_samples(200)
