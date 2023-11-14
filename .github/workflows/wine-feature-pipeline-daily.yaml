@@ -4,8 +4,8 @@ on:
   schedule:
     # At 15 past every hour
     # - cron: '10 * * * *'
-    # At 00:00 UTC every day
-    - cron: '0 0 * * *'
+    # At 23:05 UTC every day
+    - cron: '23 05 * * *'
   workflow_dispatch:
 
 jobs:
