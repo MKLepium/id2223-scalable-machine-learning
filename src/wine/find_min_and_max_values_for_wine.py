@@ -20,7 +20,7 @@ def generate_samples_with_quality(csv_file, num_samples):
             samples[column] = np.random.normal(mean, std, num_samples)
             # Replace negative values with 0
             samples[column][samples[column] < 0] = 0
-            
+
     
     generated_df = pd.DataFrame(samples)
     
@@ -47,8 +47,8 @@ def generate_n_wine_samples(num_samples):
     Generates n/2 samples of wine using the k-means clustering algorithm to generate the quality values
     And a normal distribution to generate the other values
     """
-    white_wine_path = 'wine+quality/winequality-white.csv'
-    red_wine_path = 'wine+quality/winequality-red.csv'
+    white_wine_path = 'src/wine/wine+quality/winequality-white.csv'
+    red_wine_path = 'src/wine/wine+quality/winequality-red.csv'
 
     
     white_wine_samples = generate_samples_with_quality(white_wine_path, num_samples=int(num_samples/2))

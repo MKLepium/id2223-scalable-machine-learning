@@ -34,12 +34,12 @@ def g():
 def eda():
     project = hopsworks.login()
     fs = project.get_feature_store()
-    wine_red_df = pd.read_csv("wine+quality/winequality-red.csv", sep=';')
+    wine_red_df = pd.read_csv("src/wine/wine+quality/winequality-red.csv", sep=';')
     # add a column to indicate the red wine type
     wine_red_df['type'] = -1
 
 
-    wine_white_df = pd.read_csv("wine+quality/winequality-white.csv", sep=';')
+    wine_white_df = pd.read_csv("src/wine/wine+quality/winequality-white.csv", sep=';')
     # add a column to indicate the white wine type
     wine_white_df['type'] = 1
 
