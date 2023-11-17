@@ -27,45 +27,41 @@ def g():
     fs = project.get_feature_store()
     
     mr = project.get_model_registry()
-    model = mr.get_model("iris_model", version=2)
+    model = mr.get_model("wine_model", version=1)
     model_dir = model.download()
-    model = joblib.load(model_dir + "/iris_model.pkl")
+    model = joblib.load(model_dir + "/wine_model.pkl")
     
-    feature_view = fs.get_feature_view(name="iris", version=1)
+    feature_view = fs.get_feature_view(name="wine", version=1)
     batch_data = feature_view.get_batch_data()
+
+    # batch data split in quality and the rest
+    quality = batch_data['quality']
+    batch_data_to_predict = batch_data.drop(columns=['quality'])
+
     
-    y_pred = model.predict(batch_data)
-    #print(y_pred)
-    offset = 1
-    flower = y_pred[y_pred.size-offset]
-    flower_url = "https://raw.githubusercontent.com/featurestoreorg/serverless-ml-course/main/src/01-module/assets/" + flower + ".png"
-    print("Flower predicted: " + flower)
-    img = Image.open(requests.get(flower_url, stream=True).raw)            
-    img.save("./latest_iris.png")
+    y_pred = model.predict(batch_data_to_predict)
+
     dataset_api = project.get_dataset_api()    
-    dataset_api.upload("./latest_iris.png", "Resources/images", overwrite=True)
-   
-    iris_fg = fs.get_feature_group(name="iris", version=1)
-    df = iris_fg.read() 
-    #print(df)
-    label = df.iloc[-offset]["variety"]
-    label_url = "https://raw.githubusercontent.com/featurestoreorg/serverless-ml-course/main/src/01-module/assets/" + label + ".png"
-    print("Flower actual: " + label)
-    img = Image.open(requests.get(label_url, stream=True).raw)            
-    img.save("./actual_iris.png")
-    dataset_api.upload("./actual_iris.png", "Resources/images", overwrite=True)
+
+    wine_fg = fs.get_feature_group(name="wine", version=1)
+    df = wine_fg.read() 
     
-    monitor_fg = fs.get_or_create_feature_group(name="iris_predictions",
+    monitor_fg = fs.get_or_create_feature_group(name="wine_predictions",
                                                 version=1,
                                                 primary_key=["datetime"],
-                                                description="Iris flower Prediction/Outcome Monitoring"
+                                                description="Wine flower Prediction/Outcome Monitoring"
                                                 )
     
     now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+    #data = {
+    #    'prediction': [flower],
+    #    'label': [label],
+    #    'datetime': [now],
+    #   }
     data = {
-        'prediction': [flower],
-        'label': [label],
-        'datetime': [now],
+        'prediction': y_pred,
+        'label': quality,
+        'datetime': now,
        }
     monitor_df = pd.DataFrame(data)
     monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
@@ -74,30 +70,31 @@ def g():
     # Add our prediction to the history, as the history_df won't have it - 
     # the insertion was done asynchronously, so it will take ~1 min to land on App
     history_df = pd.concat([history_df, monitor_df])
+    monitor_fg.insert(monitor_df, write_options={"wait_for_job" : False})
 
 
-    df_recent = history_df.tail(4)
-    dfi.export(df_recent, './df_recent.png', table_conversion = 'matplotlib')
-    dataset_api.upload("./df_recent.png", "Resources/images", overwrite=True)
-    
+    # Create a confusion matrix
     predictions = history_df[['prediction']]
     labels = history_df[['label']]
 
-    # Only create the confusion matrix when our iris_predictions feature group has examples of all 3 iris flowers
-    print("Number of different flower predictions to date: " + str(predictions.value_counts().count()))
-    if predictions.value_counts().count() == 3:
-        results = confusion_matrix(labels, predictions)
-    
-        df_cm = pd.DataFrame(results, ['True Setosa', 'True Versicolor', 'True Virginica'],
-                             ['Pred Setosa', 'Pred Versicolor', 'Pred Virginica'])
-    
-        cm = sns.heatmap(df_cm, annot=True)
-        fig = cm.get_figure()
-        fig.savefig("./confusion_matrix.png")
-        dataset_api.upload("./confusion_matrix.png", "Resources/images", overwrite=True)
-    else:
-        print("You need 3 different flower predictions to create the confusion matrix.")
-        print("Run the batch inference pipeline more times until you get 3 different iris flower predictions") 
+    print("Number of different wine predictions to date: " + str(predictions.value_counts().count()))
+    print("Number of different wine labels to date: " + str(labels.value_counts().count()))
+
+    # Create a confusion matrix
+    cm = confusion_matrix(labels, predictions)
+    #print(cm)
+    # save to file
+    df_cm = pd.DataFrame(cm)
+    fig = pyplot.figure(figsize=(10,7))
+    sns.heatmap(df_cm, annot=True, fmt='g')
+    pyplot.xlabel("Predicted")
+    pyplot.ylabel("Actual")
+    pyplot.title("Wine Quality Confusion Matrix")
+    pyplot.savefig("confusion_matrix.png")
+    pyplot.close(fig)
+    # upload to hopsworks
+    dataset_api.upload("confusion_matrix.png", "Resources/confusion_matrix.png")
+
 
 
 if __name__ == "__main__":
