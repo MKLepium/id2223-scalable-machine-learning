@@ -100,28 +100,40 @@ def g():
     history_df = pd.concat([history_df, monitor_df])
     #print(len(history_df))
     # print(history_df.head())
-    monitor_fg.insert(monitor_df)
+    # monitor_fg.insert(monitor_df)
+    print(monitor_df.head())
+    print(history_df.head())
 
 
     # Create a confusion matrix
     predictions = history_df[['prediction']]
     labels = history_df[['label']]
+    print(predictions.head())
+    print(labels.head())
+
+    print("T1")
+    predictions = predictions["prediction"].tolist()
+    print(predictions)
+    labels = labels["label"].tolist()
+    print(labels)
+
     cm = confusion_matrix(labels, predictions)
     # save to file
     df_cm = pd.DataFrame(cm)
+    df_cm.index = df_cm.index + 5
+    df_cm.columns = df_cm.columns + 5
     print(df_cm.head())
     fig = pyplot.figure(figsize=(10,7))
     sns.heatmap(df_cm, annot=True, fmt='g')
     pyplot.xlabel("Predicted")
     pyplot.ylabel("Actual")
     pyplot.title("Wine Quality Confusion Matrix")
-    pyplot.savefig("confusion_matrix_wine.png")
+    pyplot.savefig("confusion_matrix.png")
     pyplot.close(fig)
     # upload to hopsworks
     # file 
-    #dataset_api.upload("confusion_matrix_wine.png", "Resources/confusion_matrix_wine+.png", overwrite=True)
-    now = now.strftime('%Y-%m-%d_%H_%M_%S')
-    dataset_api.upload("confusion_matrix_wine.png", f"Resources/confusion_matrix_wine_{now}.png", overwrite=True)
+    #dataset_api.upload("confusion_matrix_wine.png", "Resources/confusion_matrix_wine.png", overwrite=True)
+    dataset_api.upload("./confusion_matrix.png", "Resources/images/wine", overwrite=True)
 
 
 def convert_data(data):
