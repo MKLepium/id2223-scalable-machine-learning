@@ -38,6 +38,7 @@ def g():
     feature_view = fs.get_feature_view("wine", version=1)
     
     batch_data = feature_view.get_batch_data()
+    print(batch_data.head())
     
     quality = fg.read()["quality"]
 
@@ -98,7 +99,7 @@ def g():
     # the insertion was done asynchronously, so it will take ~1 min to land on App
     history_df = pd.concat([history_df, monitor_df])
     #print(len(history_df))
-    print(history_df.head())
+    # print(history_df.head())
     monitor_fg.insert(monitor_df)
 
 
