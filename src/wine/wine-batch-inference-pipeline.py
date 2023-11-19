@@ -112,21 +112,21 @@ def g():
     # Create a confusion matrix
     predictions = history_df[['prediction']]
     labels = history_df[['label']]
-    print(predictions.head())
-    print(labels.head())
+    #print(predictions.head())
+    #print(labels.head())
 
-    print("T1")
+    #print("T1")
     predictions = predictions["prediction"].tolist()
-    print(predictions)
+    #print(predictions)
     labels = labels["label"].tolist()
-    print(labels)
+    #print(labels)
 
     cm = confusion_matrix(labels, predictions)
     # save to file
     df_cm = pd.DataFrame(cm)
     df_cm.index = df_cm.index + 5
     df_cm.columns = df_cm.columns + 5
-    print(df_cm.head())
+    # print(df_cm.head())
     fig = pyplot.figure(figsize=(10,7))
     sns.heatmap(df_cm, annot=True, fmt='g')
     pyplot.xlabel("Predicted")
