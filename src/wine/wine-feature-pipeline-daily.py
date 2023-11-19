@@ -7,7 +7,7 @@ from wine_sample_generator import generate_n_wine_samples
 
 
 LOCAL=True
-VERSION=3
+VERSION=1
 
 if LOCAL == False:
    stub = modal.Stub("wine_daily")
@@ -57,10 +57,6 @@ def eda():
         primary_key=list(wine_df.columns.drop('type').drop('quality')),
         description="Wine quality dataset"
     )
-    wine_df['index'] = wine_df.index - 1
-    for i in range(0, len(wine_df)):
-        wine_df.loc[i, 'index'] = i
-        print(i)
     wine_fg.insert(wine_df)
     from great_expectations.core import ExpectationSuite, ExpectationConfiguration
 
