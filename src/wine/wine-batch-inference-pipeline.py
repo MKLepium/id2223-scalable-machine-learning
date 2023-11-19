@@ -1,5 +1,6 @@
 import os
 import modal
+from constants import Constants
     
 LOCAL=True
 
@@ -25,13 +26,13 @@ def g():
     import sys
     import pyarrow as pa
 
-    project = hopsworks.login()
+    project = hopsworks.login(project="ID2223_MKLepium")
     fs = project.get_feature_store()
     
     mr = project.get_model_registry()
-    model = mr.get_model("wine_model", version=1)
+    model = mr.get_model(Constants.WINE_MODEL_NAME, version=1)
     model_dir = model.download()
-    model = joblib.load(model_dir + "/wine_model.pkl")
+    model = joblib.load(model_dir + Constants.WINE_MODEL_FILE)
 
     fg = fs.get_feature_group("wine", version=1)
     
@@ -90,10 +91,8 @@ def g():
     monitor_df = pd.DataFrame(data)
     # Because I have datetime as a unique, I'll increment it for each item 
 
-
     monitor_df = convert_data(monitor_df)
     
-
     history_df = monitor_fg.read()
     # Add our prediction to the history, as the history_df won't have it - 
     # the insertion was done asynchronously, so it will take ~1 min to land on App
@@ -104,6 +103,11 @@ def g():
     print(monitor_df.head())
     print(history_df.head())
 
+    df_recent = history_df.tail(4)
+    dfi.export(df_recent, Constants.DF_RECENT_NAME, table_conversion = 'matplotlib')
+    dataset_api.upload(Constants.DF_RECENT_NAME, Constants.HOPS_IMAGE_PATH, overwrite=True)
+
+    monitor_fg.insert(monitor_df)
 
     # Create a confusion matrix
     predictions = history_df[['prediction']]
@@ -128,12 +132,12 @@ def g():
     pyplot.xlabel("Predicted")
     pyplot.ylabel("Actual")
     pyplot.title("Wine Quality Confusion Matrix")
-    pyplot.savefig("confusion_matrix.png")
+    pyplot.savefig(Constants.CONFUSION_MATRIX_NAME)
     pyplot.close(fig)
     # upload to hopsworks
     # file 
     #dataset_api.upload("confusion_matrix_wine.png", "Resources/confusion_matrix_wine.png", overwrite=True)
-    dataset_api.upload("./confusion_matrix.png", "Resources/images/wine", overwrite=True)
+    dataset_api.upload(Constants.CONFUSION_MATRIX_NAME, Constants.HOPS_IMAGE_PATH, overwrite=True)
 
 
 def convert_data(data):
