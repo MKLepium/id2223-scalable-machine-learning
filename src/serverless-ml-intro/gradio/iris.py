@@ -2,15 +2,16 @@ import gradio as gr
 from PIL import Image
 import hopsworks
 
+
 project = hopsworks.login()
 fs = project.get_feature_store()
 
 dataset_api = project.get_dataset_api()
 
-dataset_api.download("Resources/images/latest_iris.png")
-dataset_api.download("Resources/images/actual_iris.png")
-dataset_api.download("Resources/images/df_recent.png")
-dataset_api.download("Resources/images/confusion_matrix.png")
+dataset_api.download("Resources/images/latest_iris.png", overwrite=True)
+dataset_api.download("Resources/images/actual_iris.png", overwrite=True)
+dataset_api.download("Resources/images/df_recent.png", overwrite=True)
+dataset_api.download("Resources/images/confusion_matrix.png", overwrite=True)
 
 with gr.Blocks() as demo:
     with gr.Row():
@@ -28,4 +29,4 @@ with gr.Blocks() as demo:
           gr.Label("Confusion Maxtrix with Historical Prediction Performance")
           input_img = gr.Image("confusion_matrix.png", elem_id="confusion-matrix")        
 
-demo.launch()
+demo.launch(server_port=8081, server_name="0.0.0.0")

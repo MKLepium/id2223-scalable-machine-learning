@@ -45,5 +45,5 @@ demo = gr.Interface(
         ],
     outputs=gr.Image(type="pil"))
 
-demo.launch(debug=True)
+demo.launch(debug=True, server_port=8082, server_name="0.0.0.0")
 
