@@ -97,7 +97,7 @@ def eda():
 
 if __name__ == "__main__":
     # replaces the eda notebook
-    eda()
+    # eda()
     if LOCAL == True :
         #g()
         print("yeet")
