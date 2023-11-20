@@ -23,12 +23,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r ./src/serverless-ml-intro/requirements.txt
+        pip install -r ./src/iris/requirements.txt
 
 
     - name: create python file from notebook and run it
       env:
         HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
       run: |
-        python ./src/serverless-ml-intro/notebook_to_python.py ./src/serverless-ml-intro/iris_training_pipeline.ipynb ./src/serverless-ml-intro/iris_training_pipeline.py
-        python ./src/serverless-ml-intro/iris_training_pipeline.py
+        python ./src/iris/notebook_to_python.py ./src/iris/iris_training_pipeline.ipynb ./src/iris/iris_training_pipeline.py
+        python ./src/iris/iris_training_pipeline.py

@@ -24,10 +24,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r ./src/serverless-ml-intro/requirements.txt
+        pip install -r ./src/iris/requirements.txt
 
 
     - name: Run Iris Batch Inference Pipeline
       env:
         HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
-      run: python ./src/serverless-ml-intro/iris-batch-inference-pipeline.py
+      run: python ./src/iris/iris-batch-inference-pipeline.py

@@ -99,8 +99,8 @@ if __name__ == "__main__":
     # replaces the eda notebook
     # eda()
     if LOCAL == True :
-        #g()
-        print("yeet")
+        g()
+        # print("yeet")
     else:
         stub.deploy("wine_daily")
         with stub.run():
