@@ -1,3 +1,5 @@
 .venv
 *.pkl
 *__pycache__/
+
+speech.mp3

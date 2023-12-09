@@ -8,7 +8,7 @@ from transformers import pipeline
 from llama import ask_llama
 from llama import ask_llama_yield
 
-transcriber = pipeline("automatic-speech-recognition", model="openai/whisper-base.en")
+transcriber = pipeline("automatic-speech-recognition", model="openai/whisper-medium")
 SPEECH_FILE = 'speech.mp3'
 
 def text_to_speech(text):
