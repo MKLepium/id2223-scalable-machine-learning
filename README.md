@@ -1,5 +1,7 @@
 # ID 2223 Scalable Machine Learning and Deep Learning
 
+# For Lab 2 see the [Lab2 folder](/Lab2)
+
 ## Assignment 1
 
 ### Task 1 - Iris classification
