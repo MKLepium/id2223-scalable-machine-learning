@@ -23,7 +23,7 @@ SPEECH_FILE = 'speech.mp3'
 
 
 def text_to_speech(text):
-    speech = gTTS(text=text, lang='en', slow=False) 
+    speech = gTTS(text=text, lang='de', slow=False) 
     speech.save(SPEECH_FILE) 
     return SPEECH_FILE
 
@@ -51,9 +51,10 @@ def user(user_message, history):
     return "", history + [[user_message, None]]
 
 def create_query(history):
-    query = "This is a conversation between user and llama, a friendly chatbot. respond in simple text. NOT MARKDOWN.\n\n"
+    #query = "This is a conversation between user and llama, a friendly chatbot. respond in simple text. NOT MARKDOWN.\n\n"
+    query = "Dies ist eine Konversation zwischen einem Nutzer und llama, einem freundlichen chatbot. antworte in einfachem text. Antworte in deutsch. \n\n"
     for message in history:
-        query += "User: " + message[0] + "\n\nllama: " + (message[1] + "\n\n" if message[1] else "")
+        query += "Nutzer: " + message[0] + "\n\nllama: " + (message[1] + "\n\n" if message[1] else "")
     print("query: ", query)
     return query
 

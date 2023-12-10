@@ -27,6 +27,7 @@ The unprocessed input data for the training is a total of 22GB.
 This ammounts to a total of 496,000 input rows of training data and 16,000 input rows of validation data.
 Since this data is way too large to keep it in ram or stored on disk as a single file, we need to chunk it into smaller pieces.
 We chunked the input data into chunks of 1000 rows for a total of 496 chunks of training data and 16 chunks of validation data.
+Each of those preprocessed chunks is about 1 GB in size.
 This allows us to keep the data in ram and process it in batches.
 
 ### Training the model.
@@ -63,6 +64,9 @@ The results of the evaluation can be seen in the following table:
 | Whisper-small                         | 18.48644  |
 | Whisper-medium (eval time: 4,5h)      | 12.34470  |
 
+We also had to run the Whisper-medium multiple times on google colab, since the local was not feasible for the medium model. The VRam of the 4060ti was just not enough.
+Additionally we had to run it multiple times since we ran out of computation time on colab a few times.
+
 
 
 ### Explanation for the for the evaluation:
@@ -80,6 +84,12 @@ This would have taken about 200 hours to complete.
 This is why we decided to stop the training after 20 runs.
 
 ### Conclusion:
+
+Our training did not worsen or improve the model. 
+Our assumption is that we would have needed to train the model for a lot longer to see significant improvements.
+We also think that since the german language is a significant portion of the dataset, the base-model performs reasonably well on german.
+This is why we think that the model would have needed a lot more time to converge to a better model.
+
 
 https://cdn.openai.com/papers/whisper.pdf
 https://github.com/openai/whisper
