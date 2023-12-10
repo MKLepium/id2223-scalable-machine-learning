@@ -21,8 +21,9 @@ headers = {
 data = {
     "stream": True,
     "n_predict": 400,
-    "temperature": 10.0,
-    "stop": ["</s>", "llama:", "User:"],
+    "temperature": 0.7,
+    # "temperature": 10.0,
+    "stop": ["</s>", "llama:", "Nutzer:"],
     "repeat_last_n": 256,
     "repeat_penalty": 1.18,
     "top_k": 40,
@@ -37,35 +38,38 @@ data = {
     "grammar": "",
     "prompt": "",
 }
-data2 = {
-    "temperature": 2.0,
-    "prompt": "",
-}
 
-# conversation = [
-#     "This is a conversation between user and llama, a friendly chatbot. respond in simple markdown.\n\n"
-# ]
+import string
+printable = string.ascii_letters + string.digits + string.punctuation + ' '
+def hex_escape(s):
+    return ''.join(c if c in printable else r'\x{0:02x}'.format(ord(c)) for c in s)
 
 def ask_llama(query):
     # conversation.append("User: " + question + "\n\nLlama: ")
     # prompt = "".join(conversation)
     # print("Prompt: " + prompt)
 
-    data2["prompt"] = query
+    data["prompt"] = query
 
     result = []
     with requests.Session() as session:
         # Send the initial request
-        # response = session.post(url, headers=headers, json=data, stream=True, verify=False)
-        response = session.post(url, json=data2, stream=True, verify=False)
+        response = session.post(url, headers=headers, json=data, stream=True, verify=False)
 
         # Check for a successful connection
         if response.status_code == 200:
-            print("Response: " + response.text)
-            # parse the response as json
-            response_json = json.loads(response.text)
-            print (response_json["content"])
-            result = response_json["content"]
+            print("Connected to the stream!")
+
+            # Iterate over the lines of the response content
+            for line in response.iter_lines(decode_unicode=False):
+                if line:
+                    # print(line)
+                    utf8_line = line.decode('utf-8')
+                    line_data = json.loads(utf8_line[5:])  # Remove "data: " prefix and parse JSON
+                    content = line_data.get("content")
+                    stop = line_data.get("stop")
+                    result.append(content)
+            # print(result)
 
         else:
             print(f"Request failed with status code {response.status_code}: {response.text}")

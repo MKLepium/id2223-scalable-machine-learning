@@ -14,8 +14,8 @@ from transformers import WhisperTokenizer
 from transformers import WhisperProcessor
 from transformers import WhisperForConditionalGeneration
 
-processor = WhisperProcessor.from_pretrained("openai/whisper-medium", language="German", task="transcribe")
-tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-medium", language="German", task="transcribe")
+processor = WhisperProcessor.from_pretrained("openai/whisper-medium", language="German", task="transcribe", is_multilingual=False)
+tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-medium", language="German", task="transcribe", is_multilingual=False)
 custom_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium")
 # custom_model = model_loader().model
 transcriber = pipeline("automatic-speech-recognition", model=custom_model, tokenizer=tokenizer, feature_extractor=processor.feature_extractor)
@@ -40,12 +40,6 @@ def asr(audio: np.ndarray):
     y /= np.max(np.abs(y))
 
     return transcriber({"sampling_rate": sr, "raw": y})["text"]
-
-def gpt(query, chatbot: gr.Chatbot):
-    print(chatbot)
-    response = ask_llama(query)
-    print("response: " + response)  
-    return [(query), (response)]
 
 def user(user_message, history):
     return "", history + [[user_message, None]]
@@ -79,6 +73,7 @@ with gr.Blocks() as demo:
     chatbot = gr.Chatbot(
         render_markdown=True,
         elem_id="chatbot",
+        height=800,
     )
     response_audio = gr.Audio(
         sources=['upload'],
