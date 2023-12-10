@@ -59,10 +59,11 @@ The results of the evaluation can be seen in the following table:
 
 | Model | WER |
 | --- | --- |
-| Whisper-tiny                          | 46.68657  |
-| Whisper-small-trained-20k-rows        | 18.49936  |
-| Whisper-small                         | 18.48644  |
-| Whisper-medium (eval time: 4,5h)      | 12.34470  |
+| Whisper-tiny                                              | 46.68657  |
+| Whisper-small-trained-20k-rows                            | 18.49936  |
+| Whisper-small                                             | 18.48644  |
+| Whisper-medium (eval time: 252,7 Minutes)                 | 12.34470  |
+| Whisper-medium on Dardel (eval time: 66,1 Minutes)        | 12.34470  |
 
 We also had to run the Whisper-medium multiple times on google colab, since the local was not feasible for the medium model. The VRam of the 4060ti was just not enough.
 Additionally we had to run it multiple times since we ran out of computation time on colab a few times.
