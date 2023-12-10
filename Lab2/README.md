@@ -1,5 +1,7 @@
 # ID 2223 Scalable Machine Learning and Deep Learning
 
+Link to huggingface spaces: https://huggingface.co/spaces/willeasp/voice-chat-german
+
 ## Assignment - Train Whisper Model
 
 
@@ -44,8 +46,18 @@ This process however has a few flaws:
 2. Since we are evaluating the model on a subset of the validation data, we are not getting a good representation of the models performance. Our assumption was that the model will still however over many iterations converge to a good model. This assumption was proven to be incorrect as the final model did perform similarly to the original model.
 
 
-### Something about the UI (!!!WIP!!!)
+### Service - Voice Chat in German
 
+The goal of the service is to provide a voice chat in german, using the whisper model for speech recognition, and the llama model for generated text for the chat function. 
+The google text-to-speech API is used to generate the audio that is read back to the user. 
+
+The interface is built using gradio blocks, and provides microphone and text input options.
+The chat is presented using the gradio Chatbot compoenent. 
+
+We found that we had a hard time with llama, since it often only returns a zero-width space character (`"\u200b"`), which is not visible in the chat.
+However, this is not a problem with the service, but rather with the llama model itself.
+
+The service can be found at https://huggingface.co/spaces/willeasp/voice-chat-german
 
 
 ### Evaluation for the model:
@@ -84,7 +96,7 @@ Our assumption is that the model would have needed about 100 rounds of training 
 This would have taken about 200 hours to complete.
 This is why we decided to stop the training after 20 runs.
 
-### Conclusion:
+### Conclusions:
 
 Our training did not worsen or improve the model. 
 Our assumption is that we would have needed to train the model for a lot longer to see significant improvements.

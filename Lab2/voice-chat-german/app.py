@@ -1,14 +1,10 @@
 import gradio as gr
-import random
 import numpy as np
-import time
 
 from gtts import gTTS
 from transformers import pipeline
 from llama import ask_llama
 from llama import ask_llama_yield
-from model_loader import model_loader
-from gpt4all import GPT4All
 
 from transformers import WhisperTokenizer
 from transformers import WhisperProcessor
@@ -46,14 +42,15 @@ def user(user_message, history):
 
 def create_query(history):
     #query = "This is a conversation between user and llama, a friendly chatbot. respond in simple text. NOT MARKDOWN.\n\n"
-    query = "Dies ist eine Konversation zwischen einem Nutzer und llama, einem freundlichen chatbot. antworte in einfachem text. Antworte in deutsch. \n\n"
+    query = "Dies ist eine Konversation zwischen einem Nutzer und llama, einem freundlichen chatbot. antworte in einfachem text. Antworte in deutsch.\nUser: hallo 😍\nllama: Hallo, wie kann ich Ihnen heute helfen?\n"
     for message in history:
-        query += "Nutzer: " + message[0] + "\n\nllama: " + (message[1] + "\n\n" if message[1] else "")
+        query += "Nutzer: " + message[0] + "\nllama: " + (message[1] + "\n" if message[1] else "")
     print("query: ", query)
     return query
 
 def bot(history):
     print("bot")
+    print("history", history)
     history[-1][1] = ask_llama(create_query(history))
     return history
 
