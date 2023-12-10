@@ -7,9 +7,20 @@ from gtts import gTTS
 from transformers import pipeline
 from llama import ask_llama
 from llama import ask_llama_yield
+from model_loader import model_loader
+from gpt4all import GPT4All
 
-transcriber = pipeline("automatic-speech-recognition", model="openai/whisper-medium")
+from transformers import WhisperTokenizer
+from transformers import WhisperProcessor
+from transformers import WhisperForConditionalGeneration
+
+processor = WhisperProcessor.from_pretrained("openai/whisper-medium", language="German", task="transcribe")
+tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-medium", language="German", task="transcribe")
+custom_model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium")
+# custom_model = model_loader().model
+transcriber = pipeline("automatic-speech-recognition", model=custom_model, tokenizer=tokenizer, feature_extractor=processor.feature_extractor)
 SPEECH_FILE = 'speech.mp3'
+
 
 def text_to_speech(text):
     speech = gTTS(text=text, lang='en', slow=False) 
